@@ -4,7 +4,7 @@ This project aims to detect partial discharge in electrical equipment using trad
 
 ## Project Structure
 
-- `data/`: Contains raw and processed data.
+- `data/`: Contains raw and processed data.(Obtain Seperately)
 - `scripts/`: Holds standalone scripts for analysis and visualization.
 - `src/`: Contains the main source code for the project.
     - `data_processing/`: Scripts for loading and preparing data.
