@@ -3,16 +3,20 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 import os
+import argparse
 from tqdm import tqdm
+from typing import NoReturn
 
-def analyze_station(station_id, calculate_stats=False):
+def analyze_station(station_id: int, calculate_stats: bool = False) -> None:
     """
     Performs general analysis on a station: plots sample signals and
     optionally calculates overall statistics.
+
+    Args:
+        station_id: The ID of the station to analyze.
+        calculate_stats: Whether to calculate and display overall statistics.
     """
-    # --- Build robust paths for all files ---
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     csv_path = os.path.join(project_root, 'data', 'inferred_annotation.csv')
@@ -24,19 +28,17 @@ def analyze_station(station_id, calculate_stats=False):
         print(f"Error: Could not find 'inferred_annotation.csv' at path: {csv_path}")
         return
 
-    station_df = df[df['idStation'] == int(station_id)].copy()
+    station_df = df[df['idStation'] == station_id].copy()
     if station_df.empty:
         print(f"No data found for station {station_id}.")
         return
 
-    # --- Plotting Samples ---
     output_dir = os.path.join(project_root, f"station_analysis_station_{station_id}")
     os.makedirs(output_dir, exist_ok=True)
 
     print(f"Plotting a random sample of signals to '{output_dir}'...")
 
-    # Plot 10 random signals
-    for index, row in station_df.sample(n=min(10, len(station_df))).iterrows():
+    for _, row in station_df.sample(n=min(10, len(station_df))).iterrows():
         measurement_id = row['idMeasurement']
         file_path = os.path.join(data_folder_path, str(station_id), f'{measurement_id}.npy')
         try:
@@ -47,12 +49,11 @@ def analyze_station(station_id, calculate_stats=False):
             plt.savefig(os.path.join(output_dir, f"random_{measurement_id}.png"))
             plt.close()
         except FileNotFoundError:
-            pass # Silently skip missing files for this analysis
+            pass
 
-    # Plot 10 random fault signals if they exist
     fault_df = station_df[station_df['faultAnnotation'] == 1]
     if not fault_df.empty:
-        for index, row in fault_df.sample(n=min(10, len(fault_df))).iterrows():
+        for _, row in fault_df.sample(n=min(10, len(fault_df))).iterrows():
             measurement_id = row['idMeasurement']
             file_path = os.path.join(data_folder_path, str(station_id), f'{measurement_id}.npy')
             try:
@@ -67,16 +68,13 @@ def analyze_station(station_id, calculate_stats=False):
 
     print("Finished plotting samples.")
 
-    # --- Optional Statistics Calculation ---
     if calculate_stats:
         print("\nCalculating overall statistics... (This may take a while)")
 
         all_signals = []
-        # Use tqdm for a progress bar
         for mid in tqdm(station_df['idMeasurement'], desc="Loading Signals"):
             file_path = os.path.join(data_folder_path, str(station_id), f'{mid}.npy')
             try:
-                # We load as float32 to prevent overflow on large calculations
                 signal = np.load(file_path).astype(np.float32)
                 all_signals.append(signal)
             except FileNotFoundError:
@@ -86,7 +84,6 @@ def analyze_station(station_id, calculate_stats=False):
             print("Could not load any signal data for statistics.")
             return
 
-        # Concatenate all signals into one massive array for overall stats
         full_station_signal = np.concatenate(all_signals)
 
         mean_val = np.mean(full_station_signal)
@@ -98,7 +95,6 @@ def analyze_station(station_id, calculate_stats=False):
         print(f"Min Amplitude: {np.min(full_station_signal):.4f}")
         print(f"Max Amplitude: {np.max(full_station_signal):.4f}")
 
-        # Outlier detection
         lower_bound = mean_val - 3 * std_val
         upper_bound = mean_val + 3 * std_val
         outliers = np.sum((full_station_signal < lower_bound) | (full_station_signal > upper_bound))
@@ -109,14 +105,16 @@ def analyze_station(station_id, calculate_stats=False):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("\nUsage: python analyze_station.py <station_id> [stats]")
-        print("  <station_id>: The ID of the station to analyze.")
-        print("  [stats]: Optional. Add this word to calculate overall statistics.")
-        print("\nExample (plotting only): python scripts/analyze_station.py 52010")
-        print("Example (plotting & stats): python scripts/analyze_station.py 52010 stats")
-    else:
-        station_id_arg = sys.argv[1]
-        # Check if the optional 'stats' argument was passed
-        stats_arg = len(sys.argv) > 2 and sys.argv[2].lower() == 'stats'
-        analyze_station(station_id_arg, calculate_stats=stats_arg)
+    parser = argparse.ArgumentParser(
+        description="Perform general analysis on a station.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument('station_id', type=int, help='The ID of the station to analyze.')
+    parser.add_argument(
+        '--stats',
+        action='store_true',
+        help='Optional: Add this flag to calculate overall statistics.'
+    )
+    args = parser.parse_args()
+
+    analyze_station(args.station_id, calculate_stats=args.stats)

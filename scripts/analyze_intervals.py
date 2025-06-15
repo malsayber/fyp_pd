@@ -5,18 +5,15 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import os
+from typing import NoReturn
 
-def analyze_and_visualize_intervals():
+def analyze_and_visualize_intervals() -> None:
     """
-    Identifies and visualizes contiguous time intervals from the dataset.
-    This helps understand data completeness.
+    Identifies and visualizes contiguous time intervals from the dataset to
+    understand data completeness.
     """
-    # --- FIX: Build a robust path to the CSV file ---
-    # Get the directory where this script is located
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Get the parent directory (the project root)
     project_root = os.path.dirname(script_dir)
-    # Create the full path to the CSV file inside the 'data' folder
     csv_path = os.path.join(project_root, 'data', 'inferred_annotation.csv')
 
     try:
@@ -38,7 +35,6 @@ def analyze_and_visualize_intervals():
         end = group.iloc[0]['timeStamp']
 
         for i in range(1, len(group)):
-            # Assuming an 8-hour interval between measurements
             expected_timestamp = end + pd.Timedelta(hours=8)
             actual_timestamp = group.iloc[i]['timeStamp']
 
@@ -58,7 +54,6 @@ def analyze_and_visualize_intervals():
     intervals.to_csv(intervals_csv_path, index=False)
     print(f"Saved data intervals to {intervals_csv_path}")
 
-    # Visualization
     unique_stations = intervals['idStation'].unique()
     nrows = int(np.ceil(len(unique_stations) / 2))
     fig, axs = plt.subplots(nrows=nrows, ncols=2, figsize=(15, 4 * nrows), squeeze=False)
@@ -68,7 +63,6 @@ def analyze_and_visualize_intervals():
         start_times = pd.to_datetime(group['start'])
         end_times = pd.to_datetime(group['end'])
 
-        # Using matplotlib's date functionality directly
         relative_start = mdates.date2num(start_times)
         relative_end = mdates.date2num(end_times)
 

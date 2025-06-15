@@ -4,7 +4,7 @@ This project aims to detect partial discharge in electrical equipment using trad
 
 ## Project Structure
 
-- `data/`: Contains raw and processed data.(Obtain Separately)
+- `data/`: Contains raw and processed data (Obtain Separately).
 - `scripts/`: Holds standalone scripts for analysis and visualization.
 - `src/`: Contains the main source code for the project.
     - `data_processing/`: Scripts for loading and preparing data.
@@ -13,14 +13,28 @@ This project aims to detect partial discharge in electrical equipment using trad
     - `utils/`: Helper functions.
 - `tests/`: Unit tests for the codebase.
 - `requirements.txt`: Project dependencies.
+- `trained_models/`: Stores trained machine learning models.
 
 ## Usage
 
 1.  **Install dependencies:**
-    `pip install -r requirements.txt`
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 2.  **Train the model:**
-    `python src/models/train_model.py`
+    ```bash
+    python -m src.models.train_model
+    ```
 
 3.  **Run analysis scripts:**
-    `python scripts/analyze_faults.py <station_id>`"# fyp_pd" 
+    For example, to analyze faults for a specific station:
+    ```bash
+    python scripts/analyse_fault.py <station_id>
+    ```
+
+4.  **Running Tests:**
+    To ensure the reliability of the project, you can run the included unit tests. From the root directory of the project, run:
+    ```bash
+    python -m unittest discover tests
+    ```

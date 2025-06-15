@@ -22,3 +22,10 @@ venv/
 *.png
 *.csv
 *.joblib
+
+# Trained models
+trained_models/
+
+# Tests
+tests/
+.pytest_cache/
