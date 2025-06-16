@@ -16,6 +16,7 @@ __pycache__/
 venv/
 *.pyc
 
+
 # Data & Generated Files
 # Tell Git to IGNORE these, as they will be handled by Git LFS or not tracked at all.
 *.npy
@@ -24,8 +25,8 @@ venv/
 *.joblib
 
 # Trained models
-trained_models/
+#trained_models/?
 
 # Tests
-tests/
-.pytest_cache/
+#tests/
+#.pytest_cache/
